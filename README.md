@@ -12,5 +12,4 @@
 * okhttp3
 * Spring Data JPA
 * QueryDsl
-* RabbitMQ
 * Eureka
