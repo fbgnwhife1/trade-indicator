@@ -1,0 +1,73 @@
+package tradeindicatorservice.tradeindicator.Service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import tradeindicatorservice.tradeindicator.ApiConnect.FearAndGreedApiConnect;
+import tradeindicatorservice.tradeindicator.ApiConnect.OrderBookConnect;
+import tradeindicatorservice.tradeindicator.Entity.Market;
+import tradeindicatorservice.tradeindicator.Indicator.FearAndGreed.FearAndGreed;
+import tradeindicatorservice.tradeindicator.Indicator.OrderBookResult;
+import tradeindicatorservice.tradeindicator.Indicator.RSI.RSI;
+import tradeindicatorservice.tradeindicator.Repository.JPA.AnalyzeRepository;
+import tradeindicatorservice.tradeindicator.Repository.JPA.MarketRepository;
+//import tradeindicatorservice.tradeindicator.Repository.JPA.AnalyzeRepository;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class AnalyzeService {
+
+    private final RedisTemplate<String, Double> redisTemplate;
+    private final OrderBookConnect orderBookService = new OrderBookConnect();
+    private final FearAndGreedApiConnect fearAndGreedApiConnect = new FearAndGreedApiConnect();
+    private final AnalyzeRepository analyzeRepository;
+
+    public double[] BSI(String market) {
+        List<OrderBookResult> orderBookList = orderBookService.getOrderBook(market);
+
+        double[] bsi = new double[orderBookList.size()];
+
+        for (int i = 0; i < bsi.length; i++) {
+            bsi[i] = (double) orderBookList.get(i).getBid_size() / (orderBookList.get(i).getAsk_size() + orderBookList.get(i).getBid_size());
+        }
+
+        return bsi;
+    }
+
+    public FearAndGreed getFnG() {
+        return fearAndGreedApiConnect.getFGIndex();
+    }
+
+    public double getRsi(String market){
+        String key = AnalyzeService.KeyGen.cartKeyGenerate(market);
+        if(redisTemplate.opsForValue().get(key) != null){
+            return redisTemplate.opsForValue().get(key);
+        }
+
+        RSI rsi = new RSI(14);
+        List<BigDecimal> prizeList = analyzeRepository.findRSI(market, 14);
+
+        double[] prizes = new double[prizeList.size()];
+        for (int i = 0; i < prizes.length; i++) {
+            prizes[i] = prizeList.get(i).doubleValue();
+        }
+
+        double count = rsi.count(prizes);
+        redisTemplate.opsForValue().set(key, count);
+        redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        return count;
+    }
+
+    public static class KeyGen {
+        private static final String MARKET_KEY = "market";
+
+        public static String cartKeyGenerate(String market){
+            return MARKET_KEY + ":" + market;
+        }
+    }
+}
