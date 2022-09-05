@@ -24,7 +24,7 @@ public class IndicatorSchedule {
 
     @Scheduled(cron = "* 10 * * * *")
     public void dailyRSISchedule() {
-        List<Market> all = marketRepository.findByMarketContaining("KRW");
+        List<Market> all = marketRepository.findAll();
 
         for (Market market : all) {
             String key = AnalyzeService.KeyGen.cartKeyGenerate(market.getMarket());

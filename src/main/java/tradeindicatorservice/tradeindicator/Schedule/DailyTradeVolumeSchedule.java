@@ -33,7 +33,7 @@ public class DailyTradeVolumeSchedule {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void dailyVolumeSchedule(){
-        List<Market> all = marketRepository.findByMarketContaining("KRW");
+        List<Market> all = marketRepository.findAll();
         Date date  = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
         for (Market market : all) {
@@ -46,7 +46,7 @@ public class DailyTradeVolumeSchedule {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void dailyClosePriceSchedule(){
-        List<Market> all = marketRepository.findByMarketContaining("KRW");
+        List<Market> all = marketRepository.findAll();
 
         Date date  = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
