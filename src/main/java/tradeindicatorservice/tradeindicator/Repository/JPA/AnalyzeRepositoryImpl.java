@@ -19,6 +19,7 @@ public class AnalyzeRepositoryImpl implements AnalyzeRepository{
                 .select(closePriceEntity.lastPrice)
                 .from(closePriceEntity)
                 .where(closePriceEntity.market.eq(market))
+                .groupBy(closePriceEntity.date.dayOfYear())
                 .limit(period)
                 .orderBy(closePriceEntity.date.desc())
                 .fetch();

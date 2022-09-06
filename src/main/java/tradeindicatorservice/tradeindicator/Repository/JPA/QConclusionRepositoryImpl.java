@@ -3,6 +3,7 @@ package tradeindicatorservice.tradeindicator.Repository.JPA;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import tradeindicatorservice.tradeindicator.Entity.ClosePriceEntity;
 import tradeindicatorservice.tradeindicator.Entity.MariaConclusion;
 import tradeindicatorservice.tradeindicator.Indicator.QVolumeDataDto;
 import tradeindicatorservice.tradeindicator.Indicator.VolumeDataDto;
@@ -41,6 +42,19 @@ public class QConclusionRepositoryImpl implements QConclusionRepository{
                 .orderBy(mariaConclusion.date.desc())
                 .limit(1L)
                 .fetchOne();
+    }
+
+    @Override
+    public List<MariaConclusion> initClosePrice(String market, Date date) {
+        return queryFactory
+                .select(mariaConclusion)
+                .from(mariaConclusion)
+                .where(mariaConclusion.code.eq(market)
+                        .and(mariaConclusion.date.before(date))
+                )
+                .groupBy(mariaConclusion.date.dayOfYear())
+                .orderBy(mariaConclusion.date.desc())
+                .fetch();
     }
 
     @Override

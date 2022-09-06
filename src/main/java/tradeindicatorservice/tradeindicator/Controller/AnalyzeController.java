@@ -41,6 +41,25 @@ public class AnalyzeController {
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 
+    @GetMapping("rsi/no-cache/{marketId}")
+    public ResponseEntity<Message> getRSI_no(@PathVariable String marketId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
+        Message message = new Message();
+
+        try {
+            message.setData(analyzeService.no_cache_rsi(marketId));
+        } catch (Exception e) {
+            message.setMessage(e.getMessage());
+            message.setStatus(StatusEnum.BAD_REQUEST);
+            return new ResponseEntity<>(message, headers, HttpStatus.BAD_REQUEST);
+        }
+
+        message.setMessage("OK");
+        message.setStatus(StatusEnum.OK);
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+
     @GetMapping("bsi/{marketId}")
     public ResponseEntity<Message> getBSI(@PathVariable String marketId) {
         HttpHeaders headers = new HttpHeaders();

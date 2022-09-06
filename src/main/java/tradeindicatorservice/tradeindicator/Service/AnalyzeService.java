@@ -15,6 +15,7 @@ import tradeindicatorservice.tradeindicator.Repository.JPA.MarketRepository;
 //import tradeindicatorservice.tradeindicator.Repository.JPA.AnalyzeRepository;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -49,8 +50,16 @@ public class AnalyzeService {
             return redisTemplate.opsForValue().get(key);
         }
 
+        return subRSI(market, key);
+    }
+
+    public double subRSI(String market, String key){
         RSI rsi = new RSI(14);
-        List<BigDecimal> prizeList = analyzeRepository.findRSI(market, 14);
+        List<BigDecimal> temp = analyzeRepository.findRSI(market, 14);
+        List<BigDecimal> prizeList = new ArrayList<>();
+        for (int i = temp.size()-1; i >= 0; i--) {
+            prizeList.add(temp.get(i));
+        }
 
         double[] prizes = new double[prizeList.size()];
         for (int i = 0; i < prizes.length; i++) {
@@ -59,9 +68,26 @@ public class AnalyzeService {
 
         double count = rsi.count(prizes);
         redisTemplate.opsForValue().set(key, count);
-        redisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        redisTemplate.expire(key, 10, TimeUnit.MINUTES);
         return count;
     }
+
+    public double no_cache_rsi(String market){
+        RSI rsi = new RSI(14);
+        List<BigDecimal> temp = analyzeRepository.findRSI(market, 14);
+        List<BigDecimal> prizeList = new ArrayList<>();
+        for (int i = temp.size()-1; i >= 0; i--) {
+            prizeList.add(temp.get(i));
+        }
+
+        double[] prizes = new double[prizeList.size()];
+        for (int i = 0; i < prizes.length; i++) {
+            prizes[i] = prizeList.get(i).doubleValue();
+        }
+
+        return rsi.count(prizes);
+    }
+
 
     public static class KeyGen {
         private static final String MARKET_KEY = "market";

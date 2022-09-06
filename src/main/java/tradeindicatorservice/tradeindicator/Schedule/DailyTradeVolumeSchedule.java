@@ -56,7 +56,7 @@ public class DailyTradeVolumeSchedule {
         }
     }
 
-    @Scheduled(cron = "0 2 0 * * *")
+    @Scheduled(cron = "2 0 0 * * *")
     public void dailyRemoveSchedule(){
         Date prevDate  = java.sql.Timestamp.valueOf(LocalDateTime.now().minusHours(2));
         List<MariaConclusion> list = qConclusionRepository.findBeforeDate(prevDate);
