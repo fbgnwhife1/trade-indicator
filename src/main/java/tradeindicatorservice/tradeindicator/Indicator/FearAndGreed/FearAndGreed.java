@@ -1,11 +1,15 @@
 package tradeindicatorservice.tradeindicator.Indicator.FearAndGreed;
 
 import lombok.Data;
+import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class FearAndGreed {
+@RedisHash(value = "FearAndGreed")
+public class FearAndGreed implements Serializable {
+    private static final long serialVersionUID = -987655413131L;
 
     private String name;
     private List<FnG> data;

@@ -1,6 +1,7 @@
 package tradeindicatorservice.tradeindicator.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class AnalyzeService {
     private final OrderBookConnect orderBookService = new OrderBookConnect();
     private final FearAndGreedApiConnect fearAndGreedApiConnect = new FearAndGreedApiConnect();
     private final AnalyzeRepository analyzeRepository;
+    private final RedisTemplate<String, FearAndGreed> FnGTemplate;
 
     public double[] BSI(String market) {
         List<OrderBookResult> orderBookList = orderBookService.getOrderBook(market);
@@ -41,13 +43,22 @@ public class AnalyzeService {
     }
 
     public FearAndGreed getFnG() {
-        return fearAndGreedApiConnect.getFGIndex();
+        String key = "fear&greed";
+        if(redisTemplate.opsForValue().get(key) != null){
+            return FnGTemplate.opsForValue().get(key);
+        }
+
+        FearAndGreed result = fearAndGreedApiConnect.getFGIndex();
+        FnGTemplate.opsForValue().set(key, result);
+        FnGTemplate.expire(key, 10, TimeUnit.MINUTES);
+        return result;
     }
 
     public double getRsi(String market){
         String key = AnalyzeService.KeyGen.cartKeyGenerate(market);
-        if(redisTemplate.opsForValue().get(key) != null){
-            return redisTemplate.opsForValue().get(key);
+        Double cache = redisTemplate.opsForValue().get(key);
+        if(cache != null){
+            return cache;
         }
 
         return subRSI(market, key);
