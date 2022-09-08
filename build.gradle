@@ -44,6 +44,9 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-csv
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv'
+    // https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl
+    implementation group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.13'
+
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 

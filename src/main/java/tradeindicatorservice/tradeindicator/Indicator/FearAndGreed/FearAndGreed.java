@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @RedisHash(value = "FearAndGreed")
 public class FearAndGreed implements Serializable {
-    private static final long serialVersionUID = -987655413131L;
+    private static final long serialVersionUID = 12345678912345L;
 
     private String name;
     private List<FnG> data;

@@ -1,18 +1,16 @@
 package tradeindicatorservice.tradeindicator.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 import tradeindicatorservice.tradeindicator.ApiConnect.FearAndGreedApiConnect;
 import tradeindicatorservice.tradeindicator.ApiConnect.OrderBookConnect;
-import tradeindicatorservice.tradeindicator.Entity.Market;
 import tradeindicatorservice.tradeindicator.Indicator.FearAndGreed.FearAndGreed;
 import tradeindicatorservice.tradeindicator.Indicator.OrderBookResult;
 import tradeindicatorservice.tradeindicator.Indicator.RSI.RSI;
 import tradeindicatorservice.tradeindicator.Repository.JPA.AnalyzeRepository;
-import tradeindicatorservice.tradeindicator.Repository.JPA.MarketRepository;
 //import tradeindicatorservice.tradeindicator.Repository.JPA.AnalyzeRepository;
 
 import java.math.BigDecimal;
@@ -44,7 +42,11 @@ public class AnalyzeService {
 
     public FearAndGreed getFnG() {
         String key = "fear&greed";
-        if(redisTemplate.opsForValue().get(key) != null){
+
+        FnGTemplate.setKeySerializer(new StringRedisSerializer());
+        FnGTemplate.setValueSerializer(new Jackson2JsonRedisSerializer(FearAndGreed.class));
+
+        if(FnGTemplate.opsForValue().get(key) != null){
             return FnGTemplate.opsForValue().get(key);
         }
 
